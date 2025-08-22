@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hyundai Car Customizer</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #0f1724; color: #eef2ff; }
+    header{padding:18px;background:linear-gradient(180deg,#0b1226,#0f1724);box-shadow:0 6px 30px rgba(0,0,0,.5)}
+    .wrap{max-width:1100px;margin:24px auto;padding:0 18px}
+    .page{display:none}
+    .active{display:block}
+    h1,h2{margin:0 0 12px}
+    .btn{display:inline-block;padding:10px 14px;border-radius:8px;background:#2b6ef6;color:white;border:none;cursor:pointer;margin:8px 6px}
+    .controls{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:18px}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,.04)}
+    label{display:block;margin-bottom:8px}
+    select,input{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.06);background:transparent;color:inherit}
+    .row{display:flex;gap:12px;align-items:center}
+    .swatches{display:flex;gap:8px;margin-top:6px}
+    .swatch{width:34px;height:34px;border-radius:6px;border:2px solid rgba(255,255,255,.08);cursor:pointer}
+    .price-box{margin-top:16px;padding:10px 12px;border-radius:8px;background:#0e1626;border:1px solid rgba(255,255,255,.04);font-weight:700}
+    footer{margin:32px 0 80px;text-align:center;color:rgba(255,255,255,.45)}
+    @media (max-width:880px){.controls{grid-template-columns:1fr}}
+
+    /* Thank you card styles (used on checkout) */
+    .thankyou { display:none; position:fixed; inset:0; align-items:center; justify-content:center; background:rgba(0,0,0,0.45); }
+    .thankyou.show { display:flex; }
+    .thankyou-card { background: #fff; color:#0b1226; padding:28px; border-radius:14px; box-shadow: 0 8px 40px rgba(0,0,0,.5); text-align:center; width:90%; max-width:480px; transform: translateY(-8px); opacity:0; transition: all .35s ease; }
+    .thankyou.show .thankyou-card { transform: translateY(0); opacity:1; }
+    .check { font-size:48px; color:#16a34a; }
+    .thank-btn { margin-top:18px; padding:10px 16px; border-radius:10px; background:#2b6ef6; color:#fff; border:none; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap"><h1>Hyundai Car Customizer — Demo</h1></div>
+  </header>
+
+  <main class="wrap">
+    <!-- Page 1 -->
+    <section id="page1" class="page active card">
+      <h2>Welcome</h2>
+      <p>Start customizing Hyundai models in 3D. Click below to begin.</p>
+      <button class="btn" onclick="goTo(2)">Start Customizing</button>
+    </section>
+
+    <!-- Page 2: Car Customizer with 3D modifiable model -->
+    <section id="page2" class="page card" aria-live="polite">
+      <h2>Car Customizer (3D Model)</h2>
+
+    <!-- 3D viewer -->
+     <model-viewer id="carViewer"
+        src="https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Buggy/glTF-Binary/Buggy.glb"
+        ar
+        camera-controls
+        auto-rotate
+        exposure="1"
+        style="width:100%;height:480px;border-radius:12px;background:linear-gradient(180deg,#071023,#0b1226);">
+    </model-viewer>
+
+      <div class="controls">
+        <div class="card">
+          <label for="modelSelect">Model</label>
+          <select id="modelSelect">
+            <option value="creta" style="color: black">Hyundai Creta</option>
+            <option value="i20" style="color: black">Hyundai i20</option>
+            <option value="verna" style="color: black">Hyundai Verna</option>
+            <option value="venue" style="color: black">Hyundai Venue</option>
+            <option value="tucson" style="color: black">Hyundai Tucson (SUV)</option>
+            <option value="alcazar" style="color: black">Hyundai Alcazar (SUV)</option>
+            <option value="kona" style="color: black">Hyundai Kona (SUV)</option>
+            <option value="elantra" style="color: black">Hyundai Elantra</option>
+            <option value="aura" style="color: black">Hyundai Aura</option>
+            <option value="santro" style="color: black">Hyundai Santro</option>
+          </select>
+
+          <div style="margin-top:12px">
+            <label for="wheelSelect">Wheels</label>
+            <select id="wheelSelect">
+                <option value="standard" style="color: black">Standard</option>
+                <option value="sport" style="color: black">Sport</option>
+            </select>
+          </div>
+
+          <div style="margin-top:12px">
+            <label>Color (variants / quick swatches)</label>
+            <div class="swatches" id="colorSwatches">
+              <div class="swatch" data-color="White" style="background:#ffffff;border:2px solid #ccc"></div>
+              <div class="swatch" data-color="Black" style="background:#111"></div>
+              <div class="swatch" data-color="Red" style="background:#d32f2f"></div>
+              <div class="swatch" data-color="Blue" style="background:#1976d2"></div>
+              <div class="swatch" data-color="Silver" style="background:#bdbdbd"></div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px">
+            <label>Finish</label>
+            <select id="finishSelect">
+                <option value="shiny" style="color: black">Shiny</option>
+                <option value="matte" style="color: black">Matte (+₹20,000)</option>
+            </select>
+          </div>
+
+          <div style="margin-top:12px">
+            <label>Speaker System</label>
+            <select id="speakerSelect">
+              <option value="standard" data-extra="0" style="color: black">Standard (4 speakers)</option>
+              <option value="6sp" data-extra="20000" style="color: black">6 Speakers (+₹20,000)</option>
+              <option value="8sp_sub" data-extra="40000" style="color: black">8 Speakers + Subwoofer (+₹40,000)</option>
+              <option value="premium_bose" data-extra="60000" style="color: black">Bose Premium (+₹60,000)</option>
+            </select>
+          </div>
+
+          <div style="margin-top:12px">
+            <label>Gearbox</label>
+            <select id="gearboxSelect">
+              <option value="manual" data-extra="0" style="color: black">Manual</option>
+              <option value="auto" data-extra="80000" style="color: black">Automatic (+₹80,000)</option>
+              <option value="dct" data-extra="100000" style="color: black">DCT (+₹1,00,000)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card">
+          <label>Quick Actions</label>
+          <div class="row">
+            <button class="btn" id="resetCam">Reset Camera</button>
+            <button class="btn" id="snap">Screenshot</button>
+          </div>
+
+          <div style="margin-top:12px">
+            <label>Model Variants (if available)</label>
+            <select id="variantSelect"><option value="">Default</option></select>
+          </div>
+
+          <div class="price-box" id="priceBox">Total Price: ₹ <span id="priceValue">0</span></div>
+
+          <div style="margin-top:14px;display:flex;gap:8px">
+            <button class="btn" onclick="goTo(3)">Next: Components</button>
+            <button class="btn" onclick="goTo(1)">Back Home</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Page 3: Components Customizer (kept simpler here) -->
+    <section id="page3" class="page card">
+      <h2>Components Customizer</h2>
+      <p>Component pages let you pick engine, interior, suspension and brakes. (Dynamic by model on the next screen.)</p>
+      <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="card">
+          <label>Engine</label>
+          <select id="engineSelect" style="color: black"></select>
+          <div style="height:120px;background:linear-gradient(90deg,#081023,#0b1226);margin-top:8px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.6)">Engine Image</div>
+        </div>
+        <div class="card">
+          <label>Interior</label>
+          <select id="interiorSelect">
+            <option style="color: black">Standard</option>
+            <option style="color: black">Luxury</option>
+            <option style="color: black">Sport</option>
+        </select>
+        <div style="height:120px;background:linear-gradient(90deg,#081023,#0b1226);margin-top:8px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.6)">Interior Image</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="card">
+          <label>Suspension</label>
+          <select id="suspensionSelect">
+            <option style="color: black" >Standard</option>
+            <option style="color: black" >Comfort</option>
+            <option style="color: black" >Sport</option>
+        </select>
+          <div style="height:120px;background:linear-gradient(90deg,#081023,#0b1226);margin-top:8px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.6)">Suspension Image</div>
+        </div>
+        <div class="card">
+          <label>Brakes</label>
+          <select id="brakesSelect">
+            <option style="color: black" >Standard</option> 
+            <option style="color: black" >ABS</option>
+            <option style="color: black" >Performance</option>
+        </select>
+          <div style="height:120px;background:linear-gradient(90deg,#081023,#0b1226);margin-top:8px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.6)">Brakes Image</div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;display:flex;gap:8px">
+        <button class="btn" onclick="goTo(4)">Next: Summary</button>
+        <button class="btn" onclick="goTo(2)">Back: Car</button>
+      </div>
+    </section>
+
+    <!-- Page 4: Summary -->
+    <section id="page4" class="page card">
+      <h2>Summary</h2>
+      <div id="summaryBox" style="margin-top:12px"></div>
+      <div style="margin-top:14px;display:flex;gap:8px">
+        <button class="btn" onclick="goTo(5)">Proceed to Checkout</button>
+        <button class="btn" onclick="goTo(3)">Back: Components</button>
+      </div>
+    </section>
+
+    <!-- Page 5: Checkout -->
+    <section id="page5" class="page card">
+      <h2>Checkout</h2>
+      <div id="checkoutBox" style="margin-top:12px"></div>
+      <div style="margin-top:12px">
+        <button class="btn" id="confirmBtn">Confirm Order</button>
+        <button class="btn" onclick="goTo(4)">Back: Summary</button>
+      </div>
+    </section>
+
+    <footer>Demo — replace GLBs & images with your licensed assets for production use.</footer>
+  </main>
+
+  <!-- Thank you overlay -->
+  <div id="thankYou" class="thankyou" aria-hidden="true">
+    <div class="thankyou-card">
+      <div class="check">✔️</div>
+      <h3>Thank you for your order!</h3>
+      <p style="color:rgba(11,18,38,.9);">Your customized Hyundai will be ready soon.</p>
+      <button class="thank-btn" onclick="backToHome()">Back to Home</button>
+    </div>
+  </div>
+
+<script>
+  // Use a reliable public GLB as demo asset (Buggy from Khronos). Replace with your own car GLBs for production.
+  const DEMO_GLB = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Buggy/glTF-Binary/Buggy.glb';
+
+  // Model paths - use your GLBs here. For demo we point everything to DEMO_GLB to avoid 404s.
+  const MODEL_DB = {
+    creta: { default: DEMO_GLB, sport: DEMO_GLB },
+    i20: { default: DEMO_GLB, sport: DEMO_GLB },
+    verna: { default: DEMO_GLB, sport: DEMO_GLB },
+    venue: { default: DEMO_GLB, sport: DEMO_GLB },
+    tucson: { default: DEMO_GLB, sport: DEMO_GLB },
+    alcazar: { default: DEMO_GLB, sport: DEMO_GLB },
+    kona: { default: DEMO_GLB, sport: DEMO_GLB },
+    elantra: { default: DEMO_GLB, sport: DEMO_GLB },
+    aura: { default: DEMO_GLB, sport: DEMO_GLB },
+    santro: { default: DEMO_GLB, sport: DEMO_GLB }
+  };
+
+  // State
+  const state = {
+    model: 'creta',
+    wheel: 'standard',
+    variant: null,
+    finish: 'shiny',
+    color: 'White',
+    components: { engine:null, interior:null, suspension:null, brakes:null },
+    price: 0
+  };
+
+  // elements
+  const carViewer = document.getElementById('carViewer');
+  const modelSelect = document.getElementById('modelSelect');
+  const wheelSelect = document.getElementById('wheelSelect');
+  const finishSelect = document.getElementById('finishSelect');
+  const colorSwatches = document.getElementById('colorSwatches');
+  const variantSelect = document.getElementById('variantSelect');
+  const priceValue = document.getElementById('priceValue');
+  const confirmBtn = document.getElementById('confirmBtn');
+  const thankYou = document.getElementById('thankYou');
+  const speakerSelect = document.getElementById('speakerSelect');
+  const gearboxSelect = document.getElementById('gearboxSelect');
+
+  // navigation
+  function goTo(n){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page'+n).classList.add('active');
+    if(n===3) loadComponentOptions();
+    if(n===4) buildSummary();
+    if(n===2) updateViewer();
+  }
+
+  // initialize
+  modelSelect.value = state.model;
+  updateViewer();
+  updatePrice();
+
+  // update viewer with model + wheel (switch GLB if sport available)
+  function updateViewer(){
+    const m = modelSelect.value;
+    state.model = m;
+    const wheel = wheelSelect.value;
+    state.wheel = wheel;
+    const path = (wheel==='sport' && MODEL_DB[m] && MODEL_DB[m].sport) ? MODEL_DB[m].sport : MODEL_DB[m].default;
+    carViewer.src = path;
+    // clear variants then populate after load
+    variantSelect.innerHTML = '<option value="">Default</option>';
+    carViewer.addEventListener('load', onModelLoad, { once: true });
+    updatePrice();
+  }
+
+  function onModelLoad(){
+    // availableVariants is provided by model-viewer when the glTF has variants
+    const variants = carViewer.availableVariants || [];
+    variantSelect.innerHTML = '<option value="">Default</option>' + variants.map(v=>`<option value="${v}">${v}</option>`).join('');
+  }
+
+  // color swatches
+  colorSwatches.addEventListener('click', (e)=>{
+    const sw = e.target.closest('.swatch');
+    if(!sw) return;
+    const color = sw.dataset.color;
+    state.color = color;
+    // try to set variant name (if GLB supports variants named like colors)
+    try{ carViewer.variantName = color; }catch(e){ /* ignore */ }
+    // fallback: apply tint/glow effect
+    if(!carViewer.availableVariants || carViewer.availableVariants.length===0){
+      // simple visual tint by CSS filter (demo only)
+      if(color==='White') carViewer.style.filter = 'brightness(1.05)';
+      else if(color==='Black') carViewer.style.filter = 'brightness(0.6)';
+      else if(color==='Red') carViewer.style.filter = 'hue-rotate(350deg) saturate(1.4)';
+      else if(color==='Blue') carViewer.style.filter = 'hue-rotate(200deg) saturate(1.2)';
+      else if(color==='Silver') carViewer.style.filter = 'grayscale(.12) brightness(1.05)';
+    }
+    updatePrice();
+  });
+
+  // variant select (if glTF exposes named variants)
+  variantSelect.addEventListener('change', ()=>{
+    const v = variantSelect.value || null;
+    try{ carViewer.variantName = v; }catch(e){ /* ignore */ }
+    state.variant = v;
+  });
+
+  // wheel / finish
+  wheelSelect.addEventListener('change', ()=>{ updateViewer(); });
+  finishSelect.addEventListener('change', ()=>{ state.finish = finishSelect.value; updatePrice(); });
+  modelSelect.addEventListener('change', ()=>{ updateViewer(); loadComponentOptions(); updatePrice(); });
+
+  // speaker & gearbox listeners
+  if(speakerSelect) speakerSelect.addEventListener('change', updatePrice);
+  if(gearboxSelect) gearboxSelect.addEventListener('change', updatePrice);
+
+  // screenshot
+  document.getElementById('snap').addEventListener('click', async ()=>{
+    try{
+      if(typeof carViewer.toDataURL === 'function'){
+        const dataUrl = await carViewer.toDataURL();
+        const w = window.open('');
+        w.document.write(`<img src="${dataUrl}" style="max-width:100%">`);
+      } else {
+        alert('Screenshot not supported in this browser.');
+      }
+    }catch(e){ alert('Screenshot not supported in this browser.'); }
+  });
+
+  // reset camera
+  document.getElementById('resetCam').addEventListener('click', ()=>{ carViewer.cameraOrbit = '0deg 75deg 2.5m'; });
+
+  // components options by model (page3)
+  function loadComponentOptions(){
+    const m = modelSelect.value;
+    const eng = document.getElementById('engineSelect'); eng.innerHTML = '';
+    let engines = [];
+    if(m==='santro') engines = ['1.0L','1.2L'];
+    else if(m==='i20' || m==='verna') engines = ['1.2L','1.5L'];
+    else if(m==='creta' || m==='venue') engines = ['1.5L','2.0L'];
+    else if(m==='alcazar') engines = ['2.0L','2.5L','3.0L'];
+    else if(m==='tucson' || m==='kona') engines = ['2.0L','3.0L'];
+    else engines = ['1.5L'];
+    engines.forEach(e=>eng.innerHTML += `<option value="${e}">${e}</option>`);
+
+    // set components default values
+    document.getElementById('interiorSelect').value = 'Standard';
+    document.getElementById('suspensionSelect').value = 'Standard';
+    document.getElementById('brakesSelect').value = 'Standard';
+
+    // default speaker/gearbox if present
+    if(speakerSelect) speakerSelect.value = speakerSelect.querySelector('option')?.value || 'standard';
+    if(gearboxSelect) gearboxSelect.value = gearboxSelect.querySelector('option')?.value || 'manual';
+  }
+
+  // Page flow helpers already call updatePrice/buildSummary
+  function updatePrice(){
+    // base prices (demo)
+    const base = { creta:1200000,i20:800000,verna:1100000,venue:950000,tucson:2000000,alcazar:1800000,kona:2300000,elantra:1500000,aura:750000,santro:500000 };
+    const m = modelSelect.value;
+    let total = base[m] || 1000000;
+    // wheels
+    if(wheelSelect.value==='sport') total += 50000;
+    // finish
+    if(finishSelect.value==='matte') total += 20000;
+    // color premium - assume Red/Blue cost extra
+    if(state.color==='Red' || state.color==='Blue') total += 25000;
+    // speaker extra
+    if(speakerSelect){
+      const sp = speakerSelect.options[speakerSelect.selectedIndex];
+      total += parseInt(sp.dataset.extra || 0);
+    }
+    // gearbox extra
+    if(gearboxSelect){
+      const gb = gearboxSelect.options[gearboxSelect.selectedIndex];
+      total += parseInt(gb.dataset.extra || 0);
+    }
+    priceValue.textContent = total.toLocaleString('en-IN');
+    state.price = total;
+  }
+
+  // build summary
+  function buildSummary(){
+    const s = {
+      Model: modelSelect.value,
+      Wheels: wheelSelect.value,
+      Color: state.color,
+      Finish: finishSelect.value,
+      Speaker: speakerSelect ? speakerSelect.options[speakerSelect.selectedIndex].text : 'Standard',
+      Gearbox: gearboxSelect ? gearboxSelect.options[gearboxSelect.selectedIndex].text : 'Manual',
+      Engine: document.getElementById('engineSelect').value || '-',
+      Interior: document.getElementById('interiorSelect').value,
+      Suspension: document.getElementById('suspensionSelect').value,
+      Brakes: document.getElementById('brakesSelect').value,
+      Price: `₹ ${state.price.toLocaleString('en-IN')}`
+    };
+    let html = '<div style="display:grid;gap:10px">';
+    for(const k in s) html += `<div><strong>${k}:</strong> ${s[k]}</div>`;
+    html += '</div>';
+    document.getElementById('summaryBox').innerHTML = html;
+  }
+
+  // checkout
+  function confirmOrder(){
+    // replace confirm button with thank you card and show confetti
+    document.getElementById('confirmBtn').style.display = 'none';
+    showThankYou();
+  }
+
+  function showThankYou(){
+    thankYou.classList.add('show');
+    thankYou.setAttribute('aria-hidden','false');
+
+    // simple confetti (canvas-free) — create a few floating emoji pieces for demo
+    const pieces = [];
+    for(let i=0;i<40;i++){
+      const el = document.createElement('div');
+      el.textContent = ['🎉','✨','🎊','✅'][Math.floor(Math.random()*4)];
+      el.style.position='fixed'; el.style.left=Math.random()*100+'%'; el.style.top='-10%'; el.style.fontSize=(10+Math.random()*20)+'px'; el.style.opacity=0.9;
+      el.style.transform=`translateY(0) rotate(${Math.random()*360}deg)`;
+      document.body.appendChild(el);
+      pieces.push(el);
+      // animate
+      const dur = 2500 + Math.random()*2000;
+      el.animate([ { transform: `translateY(0) rotate(0deg)`, opacity:1 }, { transform: `translateY(${80+Math.random()*500}px) rotate(${Math.random()*720}deg)`, opacity:0 } ], { duration: dur, easing: 'cubic-bezier(.2,.7,.2,1)' });
+      setTimeout(()=>{ try{ el.remove(); }catch(e){} }, dur+50);
+    }
+  }
+
+  function backToHome(){
+    // hide thank you and go to home
+    thankYou.classList.remove('show');
+    thankYou.setAttribute('aria-hidden','true');
+    // restore confirm button
+    document.getElementById('confirmBtn').style.display = 'inline-block';
+    goTo(1);
+  }
+
+  // expose goTo globally
+  window.goTo = goTo;
+  window.confirmOrder = confirmOrder;
+  window.backToHome = backToHome;
+
+  // watch changes affecting price
+  wheelSelect.addEventListener('change', updatePrice);
+  finishSelect.addEventListener('change', updatePrice);
+  colorSwatches.addEventListener('click', updatePrice);
+  modelSelect.addEventListener('change', updatePrice);
+
+</script>
+</body>
+</html>
